@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:key="url"
+        android:summary="URL to send location data to"
+        android:title="URL" />
+    <EditTextPreference
+        android:key="username"
+        android:summary="Authentication username"
+        android:title="Username" />
+    <EditTextPreference
+        android:inputType="textPassword"
+        android:key="password"
+        android:summary="Authentication password"
+        android:title="Password" />
+</PreferenceScreen>
