@@ -3,9 +3,11 @@
     package="com.amf.findme">
 
     <uses-feature android:name="android.hardware.location.gps" />
+
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -17,16 +19,28 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name=".IntervalService"
-            android:exported="false" />
-        <service
-            android:name=".LocationService"
+
+        <receiver
             android:enabled="true"
-            android:exported="false" />
+            android:exported="true"
+            android:name=".BootReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:exported="false"
+            android:name=".IntervalService" />
+        <service
+            android:exported="false"
+            android:name=".LocationService" />
+
     </application>
 
 </manifest>
