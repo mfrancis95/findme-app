@@ -9,8 +9,10 @@ import android.location.LocationManager;
 import android.preference.PreferenceManager;
 import android.util.Base64;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -33,7 +35,6 @@ public class LocationService extends IntentService {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             URL url = new URL(preferences.getString("url", null));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setChunkedStreamingMode(0);
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
             String username = preferences.getString("username", null);
@@ -41,15 +42,21 @@ public class LocationService extends IntentService {
             String base64 = Base64.encodeToString((username + ":" + password).getBytes(), Base64.DEFAULT);
             connection.setRequestProperty("Authorization", "Basic " + base64);
             connection.setRequestMethod("POST");
-            try (OutputStream stream = connection.getOutputStream()) {
-                JSONObject json = new JSONObject();
-                json.put("lat", location.getLatitude());
-                json.put("lng", location.getLongitude());
-                stream.write(json.toString().getBytes());
-            }
+            sendLocation(connection, location);
             connection.getInputStream().close();
         }
         catch (Exception ex) {}
+    }
+
+    private void sendLocation(HttpURLConnection connection, Location location) throws IOException, JSONException {
+        JSONObject json = new JSONObject();
+        json.put("lat", location.getLatitude());
+        json.put("lng", location.getLongitude());
+        byte[] bytes = json.toString().getBytes();
+        connection.setFixedLengthStreamingMode(bytes.length);
+        try (OutputStream stream = connection.getOutputStream()) {
+            stream.write(bytes);
+        }
     }
 
 }
