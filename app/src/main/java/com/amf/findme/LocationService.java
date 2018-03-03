@@ -24,7 +24,7 @@ public class LocationService extends IntentService {
     }
 
     protected void onHandleIntent(Intent intent) {
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
             Location location = null;
             for (String provider : locationManager.getAllProviders()) {
@@ -35,28 +35,24 @@ public class LocationService extends IntentService {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             URL url = new URL(preferences.getString("url", null));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json");
             String username = preferences.getString("username", null);
             String password = preferences.getString("password", null);
             String base64 = Base64.encodeToString((username + ":" + password).getBytes(), Base64.DEFAULT);
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Authorization", "Basic " + base64);
             connection.setRequestMethod("POST");
-            sendLocation(connection, location);
+            JSONObject json = new JSONObject();
+            json.put("lat", location.getLatitude());
+            json.put("lng", location.getLongitude());
+            byte[] bytes = json.toString().getBytes();
+            connection.setFixedLengthStreamingMode(bytes.length);
+            try (OutputStream stream = connection.getOutputStream()) {
+                stream.write(bytes);
+            }
             connection.getInputStream().close();
         }
         catch (Exception ex) {}
-    }
-
-    private void sendLocation(HttpURLConnection connection, Location location) throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("lat", location.getLatitude());
-        json.put("lng", location.getLongitude());
-        byte[] bytes = json.toString().getBytes();
-        connection.setFixedLengthStreamingMode(bytes.length);
-        try (OutputStream stream = connection.getOutputStream()) {
-            stream.write(bytes);
-        }
     }
 
 }

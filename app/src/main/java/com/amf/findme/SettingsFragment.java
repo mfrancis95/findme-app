@@ -1,6 +1,5 @@
 package com.amf.findme;
 
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
@@ -30,4 +29,5 @@ public class SettingsFragment extends PreferenceFragment implements SharedPrefer
             preference.setSummary(sharedPreferences.getString(key, ""));
         }
     }
+
 }
